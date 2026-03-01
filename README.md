@@ -31,6 +31,18 @@ gitcredits
 
 That's it. Navigate into any git repository and run `gitcredits`.
 
+### Themes
+
+**Matrix** — digital rain with text resolve effect:
+
+```bash
+gitcredits --theme matrix
+```
+
+<p align="center">
+  <img src="assets/matrix-demo.gif" alt="gitcredits matrix theme" width="720">
+</p>
+
 ### Controls
 
 | Key | Action |
