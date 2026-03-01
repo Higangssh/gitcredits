@@ -273,13 +273,13 @@ func buildCredits(info repoInfo, width int) []string {
 }
 
 // ============================================================
-// MARVEL THEME — Matrix rain + text resolve animation
+// MATRIX THEME — Matrix rain + text resolve animation
 // ============================================================
 
 // matrix rain characters
 var matrixChars = []rune("ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ012345789ABCDEFZ")
 
-func heroTitle(rank int, commits int) string {
+func matrixHeroTitle(rank int, commits int) string {
 	if rank == 0 {
 		if commits >= 100 {
 			return "THE ARCHITECT"
@@ -304,12 +304,12 @@ func heroTitle(rank int, commits int) string {
 }
 
 // A "card" is one screen of content to display
-type marvelCard struct {
+type matrixCard struct {
 	lines []string // text content, indexed by row (len = height)
 }
 
-func buildMarvelCards(info repoInfo, width, height int) []marvelCard {
-	var cards []marvelCard
+func buildMatrixCards(info repoInfo, width, height int) []matrixCard {
+	var cards []matrixCard
 
 	center := func(s string) string {
 		runeLen := len([]rune(s))
@@ -320,7 +320,7 @@ func buildMarvelCards(info repoInfo, width, height int) []marvelCard {
 		return strings.Repeat(" ", pad) + s
 	}
 
-	makeCard := func(content []string) marvelCard {
+	makeCard := func(content []string) matrixCard {
 		lines := make([]string, height)
 		startY := (height - len(content)) / 2
 		if startY < 0 {
@@ -331,7 +331,7 @@ func buildMarvelCards(info repoInfo, width, height int) []marvelCard {
 				lines[startY+i] = line
 			}
 		}
-		return marvelCard{lines: lines}
+		return matrixCard{lines: lines}
 	}
 
 	// card 0: title (big + description + stats summary)
@@ -386,7 +386,7 @@ func buildMarvelCards(info repoInfo, width, height int) []marvelCard {
 		var content []string
 		content = append(content, center("━━━━━━━━━━━━━━━━━━━━━━━━"))
 		content = append(content, "")
-		content = append(content, center(heroTitle(rank, c.commits)))
+		content = append(content, center(matrixHeroTitle(rank, c.commits)))
 		content = append(content, "")
 		content = append(content, "")
 		content = append(content, center(spacedName(c.name)))
@@ -427,7 +427,7 @@ func buildMarvelCards(info repoInfo, width, height int) []marvelCard {
 	return cards
 }
 
-// Marvel animation states
+// Matrix animation states
 const (
 	mvsRain     = 0 // pure rain
 	mvsResolve  = 1 // rain chars → real text
@@ -505,8 +505,8 @@ type model struct {
 	done   bool
 	theme  string
 
-	// marvel theme
-	cards      []marvelCard
+	// matrix theme
+	cards      []matrixCard
 	cardIdx    int
 	mState     int
 	mFrame     int // frame counter within current state
@@ -620,7 +620,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		if m.theme == "matrix" {
-			return m.updateMarvel()
+			return m.updateMatrix()
 		}
 		m.offset++
 		if m.offset > len(m.lines) {
@@ -635,7 +635,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) updateMarvel() (tea.Model, tea.Cmd) {
+func (m model) updateMatrix() (tea.Model, tea.Cmd) {
 	m.tickRain()
 	m.mFrame++
 
@@ -723,12 +723,12 @@ func (m model) View() string {
 		return ""
 	}
 	if m.theme == "matrix" {
-		return m.viewMarvel()
+		return m.viewMatrix()
 	}
 	return m.viewDefault()
 }
 
-func (m model) viewMarvel() string {
+func (m model) viewMatrix() string {
 	// color palette
 	greenBright := lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF41"))
 	greenMed := lipgloss.NewStyle().Foreground(lipgloss.Color("#00AA30"))
@@ -738,7 +738,7 @@ func (m model) viewMarvel() string {
 	whiteText := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF")).Bold(true)
 	cyanText := lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF"))
 
-	var card marvelCard
+	var card matrixCard
 	if m.cardIdx < len(m.cards) {
 		card = m.cards[m.cardIdx]
 	}
@@ -1009,7 +1009,7 @@ func main() {
 
 	switch theme {
 	case "matrix":
-		cards := buildMarvelCards(info, width, height)
+		cards := buildMatrixCards(info, width, height)
 		m = model{
 			height:  height,
 			width:   width,
