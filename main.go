@@ -8,11 +8,20 @@ import (
 	"golang.org/x/term"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+)
+
 func main() {
 	// parse flags
 	theme := "default"
 	output := ""
 	for i, arg := range os.Args[1:] {
+		if arg == "--version" || arg == "-v" {
+			fmt.Printf("gitcredits %s (%s)\n", version, commit)
+			os.Exit(0)
+		}
 		if arg == "--theme" && i+1 < len(os.Args[1:]) {
 			theme = os.Args[i+2]
 		}

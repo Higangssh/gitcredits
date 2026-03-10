@@ -8,6 +8,18 @@
 
 ## Install
 
+### Quick install (recommended)
+
+```bash
+curl -sL https://raw.githubusercontent.com/Higangssh/gitcredits/main/install.sh | sh
+```
+
+Supports macOS (Intel/Apple Silicon), Linux (x86_64/ARM64), and Windows (x86_64 via Git Bash).
+
+### Pre-built binaries
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/Higangssh/gitcredits/releases).
+
 ### Go
 
 ```bash
