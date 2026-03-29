@@ -69,7 +69,7 @@ func main() {
 		default:
 			cards = buildMatrixCards(info, 80, 24)
 		}
-		if err := generateGIF(output, theme, credits, len(cards)); err != nil {
+		if err := generateGIF(output, theme, dir, credits, len(cards)); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}

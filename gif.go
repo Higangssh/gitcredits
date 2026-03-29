@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func generateGIF(outputPath, theme string, lines []string, cardCount int) error {
+func generateGIF(outputPath, theme string, dir string, lines []string, cardCount int) error {
 	// check vhs installed
 	vhsPath, err := exec.LookPath("vhs")
 	if err != nil {
@@ -62,9 +62,14 @@ func generateGIF(outputPath, theme string, lines []string, cardCount int) error 
 	tape.WriteString("Set TypingSpeed 0\n")
 
 	cmd := selfPath
+	// perhaps we need some better logic here?
 	if theme != "default" {
 		cmd += " --theme " + theme
 	}
+	if dir != "" {
+		cmd += " " + dir
+	}
+
 	tape.WriteString(fmt.Sprintf("Type \"%s\"\n", cmd))
 	tape.WriteString("Enter\n")
 	tape.WriteString(fmt.Sprintf("Sleep %ds\n", duration))
