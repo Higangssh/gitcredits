@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -25,15 +26,33 @@ type contributor struct {
 	commits int
 }
 
-func getRepoInfo() repoInfo {
+func getRepoInfo(dir string) (repoInfo, error) {
 	info := repoInfo{}
-
-	if dir, err := os.Getwd(); err == nil {
-		parts := strings.Split(dir, string(os.PathSeparator))
-		info.name = parts[len(parts)-1]
+	repoDir := dir
+	if repoDir == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			return info, fmt.Errorf("get current directory: %w", err)
+		}
+		repoDir = wd
 	}
 
-	if desc, err := os.ReadFile(".git/description"); err == nil {
+	absRepoDir, err := filepath.Abs(repoDir)
+	if err != nil {
+		return info, fmt.Errorf("resolve repository path %q: %w", repoDir, err)
+	}
+
+	stat, err := os.Stat(absRepoDir)
+	if err != nil {
+		return info, fmt.Errorf("access repository path %q: %w", absRepoDir, err)
+	}
+	if !stat.IsDir() {
+		return info, fmt.Errorf("repository path %q is not a directory", absRepoDir)
+	}
+
+	info.name = filepath.Base(absRepoDir)
+
+	if desc, err := os.ReadFile(filepath.Join(absRepoDir, ".git", "description")); err == nil {
 		d := strings.TrimSpace(string(desc))
 		if d != "" && d != "Unnamed repository; edit this file 'description' to name the repository." {
 			info.description = d
@@ -41,7 +60,7 @@ func getRepoInfo() repoInfo {
 	}
 
 	if info.description == "" {
-		if out, err := exec.Command("gh", "repo", "view", "--json", "description", "-q", ".description").Output(); err == nil {
+		if out, err := runCommand(absRepoDir, "gh", "repo", "view", "--json", "description", "-q", ".description"); err == nil {
 			d := strings.TrimSpace(string(out))
 			if d != "" {
 				info.description = d
@@ -49,13 +68,13 @@ func getRepoInfo() repoInfo {
 		}
 	}
 
-	if out, err := exec.Command("git", "rev-list", "--count", "HEAD").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "git", "rev-list", "--count", "HEAD"); err == nil {
 		if n, err := strconv.Atoi(strings.TrimSpace(string(out))); err == nil {
 			info.totalCommits = n
 		}
 	}
 
-	if out, err := exec.Command("git", "shortlog", "-sn", "--no-merges", "HEAD").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "git", "shortlog", "-sn", "--no-merges", "HEAD"); err == nil {
 		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
 		for _, line := range lines {
 			line = strings.TrimSpace(line)
@@ -77,7 +96,7 @@ func getRepoInfo() repoInfo {
 		return info.contributors[i].commits > info.contributors[j].commits
 	})
 
-	if out, err := exec.Command("git", "log", "--oneline", "--no-merges", "-50", "--format=%s").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "git", "log", "--oneline", "--no-merges", "-50", "--format=%s"); err == nil {
 		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
 		for _, line := range lines {
 			line = strings.TrimSpace(line)
@@ -96,27 +115,33 @@ func getRepoInfo() repoInfo {
 		}
 	}
 
-	if out, err := exec.Command("gh", "repo", "view", "--json", "stargazerCount", "-q", ".stargazerCount").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "gh", "repo", "view", "--json", "stargazerCount", "-q", ".stargazerCount"); err == nil {
 		if n, err := strconv.Atoi(strings.TrimSpace(string(out))); err == nil {
 			info.stars = n
 		}
 	}
 
-	if out, err := exec.Command("gh", "repo", "view", "--json", "licenseInfo", "-q", ".licenseInfo.name").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "gh", "repo", "view", "--json", "licenseInfo", "-q", ".licenseInfo.name"); err == nil {
 		l := strings.TrimSpace(string(out))
 		if l != "" {
 			info.license = l
 		}
 	}
 
-	if out, err := exec.Command("gh", "repo", "view", "--json", "primaryLanguage", "-q", ".primaryLanguage.name").Output(); err == nil {
+	if out, err := runCommand(absRepoDir, "gh", "repo", "view", "--json", "primaryLanguage", "-q", ".primaryLanguage.name"); err == nil {
 		l := strings.TrimSpace(string(out))
 		if l != "" {
 			info.language = l
 		}
 	}
 
-	return info
+	return info, nil
+}
+
+func runCommand(dir, name string, args ...string) ([]byte, error) {
+	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
+	return cmd.Output()
 }
 
 // simple block letter generator for title

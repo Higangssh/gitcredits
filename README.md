@@ -39,9 +39,12 @@ go build -o gitcredits .
 ```bash
 cd your-repo
 gitcredits
+
+# or target another repository directly
+gitcredits /path/to/your-repo
 ```
 
-That's it. Navigate into any Git repository and run `gitcredits`.
+That's it. Run `gitcredits` inside a Git repository, or pass a target repository path directly.
 
 ### Themes
 
@@ -73,6 +76,7 @@ Save the credits as a high-quality GIF — perfect for READMEs, presentations, o
 gitcredits --output credits.gif
 gitcredits --output credits.gif --theme matrix
 gitcredits --output credits.gif --theme spiderman
+gitcredits /path/to/your-repo --output credits.gif
 ```
 
 Requires [VHS](https://github.com/charmbracelet/vhs) and [ffmpeg](https://ffmpeg.org/):
