@@ -42,8 +42,8 @@ type model struct {
 	// default theme
 	lines     []string
 	offset    int
-	starField      starField
-	webField       webField
+	starField starField
+	webField  webField
 
 	// common
 	height int
@@ -509,12 +509,26 @@ func (m model) viewSpiderman() string {
 				onLine := false
 				if dist <= sqRadius {
 					// Check if on a radial line (8 directions)
-					if dx == 0 && dy != 0 { onLine = true } // vertical
-					if dy == 0 && dx != 0 { onLine = true } // horizontal
-					adx := dx; if adx < 0 { adx = -adx }
-					ady := dy; if ady < 0 { ady = -ady }
-					if adx == ady { onLine = true } // diagonals
-					if ady >= adx-1 && ady <= adx+1 { onLine = true } // near-diagonal
+					if dx == 0 && dy != 0 {
+						onLine = true
+					} // vertical
+					if dy == 0 && dx != 0 {
+						onLine = true
+					} // horizontal
+					adx := dx
+					if adx < 0 {
+						adx = -adx
+					}
+					ady := dy
+					if ady < 0 {
+						ady = -ady
+					}
+					if adx == ady {
+						onLine = true
+					} // diagonals
+					if ady >= adx-1 && ady <= adx+1 {
+						onLine = true
+					} // near-diagonal
 				}
 
 				// Concentric rings

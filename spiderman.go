@@ -43,7 +43,7 @@ func glitchLine(s string, intensity float64) string {
 		if rand.Float64() < intensity {
 			result[i] = glitchChars[rand.Intn(len(glitchChars))]
 		} else {
-			result[i]  = r
+			result[i] = r
 		}
 	}
 	return string(result)
